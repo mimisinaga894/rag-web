@@ -115,7 +115,7 @@ class ChatController extends Controller
                 'payload' => $payload
             ]);
 
-            $response = Http::timeout(60)
+            $response = Http::timeout(180)  // 3 minutes for larger LLM models
                 ->connectTimeout(10)
                 ->withHeaders([
                     'Content-Type' => 'application/json',

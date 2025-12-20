@@ -1836,9 +1836,9 @@
                     addNewChatToSidebar(currentChatId, 'Obrolan Baru');
                 }
 
-                // Kirim pesan dengan timeout 90 detik (LLM bisa lambat)
+                // Kirim pesan dengan timeout 200 detik (untuk model LLM besar seperti Qwen 8B)
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 detik
+                const timeoutId = setTimeout(() => controller.abort(), 200000); // 200 detik
                 
                 const response = await fetch(`/chat/${currentChatId}/send`, {
                     method: "POST",
