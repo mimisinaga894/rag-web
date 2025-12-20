@@ -1836,7 +1836,10 @@
                     addNewChatToSidebar(currentChatId, 'Obrolan Baru');
                 }
 
-                // Kirim pesan
+                // Kirim pesan dengan timeout 90 detik (LLM bisa lambat)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 detik
+                
                 const response = await fetch(`/chat/${currentChatId}/send`, {
                     method: "POST",
                     headers: {
@@ -1846,8 +1849,11 @@
                     body: JSON.stringify({
                         chat_id: currentChatId,
                         message: message
-                    })
+                    }),
+                    signal: controller.signal
                 });
+                
+                clearTimeout(timeoutId);
 
                 const data = await response.json();
                 hideTypingIndicator();
@@ -1875,7 +1881,13 @@
                 }
             } catch (error) {
                 hideTypingIndicator();
-                addMessage("❌ Terjadi kesalahan koneksi ke server.", "bot");
+                
+                // Bedakan antara timeout dan error lainnya
+                if (error.name === 'AbortError') {
+                    addMessage("⏱️ Server terlalu lama merespons (timeout). Silakan coba lagi.", "bot");
+                } else {
+                    addMessage("❌ Terjadi kesalahan koneksi ke server.", "bot");
+                }
                 console.error(error);
             } finally {
                 sendBtn.disabled = false;
