@@ -11,16 +11,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::create([
+            'username' => 'admin.siassist',
             'name' => 'Admin SIAssist',
             'email' => 'admin@siassist.com',
-            'password' => Hash::make('admin123'),
+            'nim_nidn' => '0001',
+            'password' => Hash::make('Adm1n@S1Assist2024!'),
             'role' => 'admin',
         ]);
 
         User::create([
-            'name' => 'User SIAssist',
-            'email' => 'user@siassist.com',
-            'password' => Hash::make('user123'),
+            'username' => '41522010000',
+            'name' => 'Mahasiswa Demo',
+            'email' => 'mahasiswa@siassist.com',
+            'nim_nidn' => '2024001001',
+            'password' => Hash::make('Mhs@Demo2024!'),
             'role' => 'user',
         ]);
     }

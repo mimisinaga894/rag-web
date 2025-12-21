@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>SIAssist - Smart Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         * {
@@ -828,8 +830,110 @@
             line-height: 1.6;
             border: 1px solid rgba(14, 165, 233, 0.1);
             font-size: 13px;
-            white-space: pre-wrap;
         }
+
+        /* Markdown styling inside bot messages */
+        .bot-message p {
+            margin: 0 0 8px 0;
+        }
+
+        .bot-message p:last-child {
+            margin-bottom: 0;
+        }
+
+        .bot-message h1,
+        .bot-message h2,
+        .bot-message h3 {
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+            color: #0369a1;
+        }
+
+        .bot-message h1 {
+            font-size: 16px;
+        }
+
+        .bot-message h2 {
+            font-size: 15px;
+        }
+
+        .bot-message h3 {
+            font-size: 14px;
+        }
+
+        .bot-message ul,
+        .bot-message ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .bot-message li {
+            margin: 4px 0;
+        }
+
+        .bot-message code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: #0369a1;
+        }
+
+        .bot-message pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .bot-message pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        .bot-message blockquote {
+            border-left: 3px solid #0ea5e9;
+            padding-left: 12px;
+            margin: 8px 0;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .bot-message strong {
+            font-weight: 600;
+            color: #0369a1;
+        }
+
+        .bot-message em {
+            font-style: italic;
+        }
+
+        .bot-message a {
+            color: #0ea5e9;
+            text-decoration: underline;
+        }
+
+        .bot-message table {
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .bot-message th,
+        .bot-message td {
+            border: 1px solid #e2e8f0;
+            padding: 6px 10px;
+        }
+
+        .bot-message th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+
 
         /* Sources Display (Modern LLM Style) */
         .sources-container {
@@ -1286,7 +1390,7 @@
                     @endif
 
                     @if ($msg->bot_response)
-                        <div class="bot-message">{{ $msg->bot_response }}</div>
+                        <div class="bot-message" data-markdown>{!! $msg->bot_response !!}</div>
                         @if ($msg->sources && count($msg->sources) > 0)
                             <div class="sources-container">
                                 <div class="sources-header">📚 <span>Sumber Referensi</span></div>
@@ -1391,8 +1495,9 @@
                     <input type="email" id="accountEmail" class="form-input" placeholder="Masukkan email">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">No. Telepon</label>
-                    <input type="tel" id="accountPhone" class="form-input" placeholder="Masukkan nomor telepon">
+                    <label class="form-label">NIM/NIDN</label>
+                    <input type="text" id="accountNimNidn" class="form-input"
+                        placeholder="NIM (mahasiswa) atau NIDN (dosen)">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Password Baru (opsional)</label>
@@ -1672,7 +1777,14 @@
         function addMessage(text, sender) {
             const bubble = document.createElement("div");
             bubble.className = sender === "user" ? "user-message" : "bot-message";
-            bubble.textContent = text;
+
+            if (sender === "bot" && typeof marked !== 'undefined') {
+                // Parse markdown for bot messages
+                bubble.innerHTML = marked.parse(text);
+            } else {
+                bubble.textContent = text;
+            }
+
             chatBox.appendChild(bubble);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -1978,7 +2090,7 @@
     async function saveAccount() {
         const name = document.getElementById('accountName').value;
         const email = document.getElementById('accountEmail').value;
-        const phone = document.getElementById('accountPhone').value;
+        const nim_nidn = document.getElementById('accountNimNidn').value;
         const password = document.getElementById('accountPassword').value;
         const messageDiv = document.getElementById('accountMessage');
 
@@ -1989,7 +2101,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({ name, email, phone, password: password || null })
+                body: JSON.stringify({ name, email, nim_nidn, password: password || null })
             });
 
             const data = await response.json();
@@ -2036,10 +2148,21 @@
                 const data = await response.json();
                 document.getElementById('accountName').value = data.name || '';
                 document.getElementById('accountEmail').value = data.email || '';
-                document.getElementById('accountPhone').value = data.phone || '';
+                document.getElementById('accountNimNidn').value = data.nim_nidn || '';
             }
         } catch (error) {
             console.error('Error loading account:', error);
+        }
+    }
+
+    // Parse markdown for existing bot messages
+    function parseExistingMarkdown() {
+        if (typeof marked !== 'undefined') {
+            document.querySelectorAll('.bot-message[data-markdown]').forEach(el => {
+                const rawText = el.textContent;
+                el.innerHTML = marked.parse(rawText);
+                el.removeAttribute('data-markdown');
+            });
         }
     }
 
@@ -2047,6 +2170,7 @@
     window.onload = function () {
         loadTheme();
         loadAccount();
+        parseExistingMarkdown();
     };
 </script>
 

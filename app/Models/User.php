@@ -11,12 +11,12 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'username',
         'name',
         'email',
-        'phone',
+        'nim_nidn',
         'password',
         'role',
-        'nim',
     ];
 
     protected $hidden = [

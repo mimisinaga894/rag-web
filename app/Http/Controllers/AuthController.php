@@ -26,12 +26,12 @@ class AuthController extends Controller
     {
         // Validasi input
         $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['required', 'string'],
             'password' => ['required']
         ]);
 
         // Coba autentikasi
-        if (Auth::attempt($request->only('email', 'password'))) {
+        if (Auth::attempt($request->only('username', 'password'))) {
             $request->session()->regenerate();
             $user = Auth::user();
 
@@ -46,10 +46,10 @@ class AuthController extends Controller
 
             // Fallback jika role tidak valid
             Auth::logout();
-            return back()->withErrors(['email' => 'Role pengguna tidak valid.']);
+            return back()->withErrors(['username' => 'Role pengguna tidak valid.']);
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah.']);
+        return back()->withErrors(['username' => 'Username atau password salah.']);
     }
 
     /**
@@ -72,9 +72,10 @@ class AuthController extends Controller
         $user = Auth::user();
 
         return response()->json([
+            'username' => $user->username,
             'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone ?? '',
+            'email' => $user->email ?? '',
+            'nim_nidn' => $user->nim_nidn ?? '',
         ]);
     }
 
@@ -86,8 +87,8 @@ class AuthController extends Controller
         // Validasi input
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|unique:users,email,' . Auth::id(),
+            'nim_nidn' => 'nullable|string|max:20',
             'password' => 'nullable|min:6',
         ]);
 
@@ -96,7 +97,7 @@ class AuthController extends Controller
         // Update data akun
         $user->name = $request->input('name');
         $user->email = $request->input('email');
-        $user->phone = $request->input('phone');
+        $user->nim_nidn = $request->input('nim_nidn');
 
         // Update password jika diisi
         if ($request->filled('password')) {

@@ -137,9 +137,9 @@
             @csrf
 
             <div class="mb-3">
-                <label>Email</label>
-                <input type="email" name="email" class="form-control" value="{{ old('email') }}"
-                    placeholder="example@gmail.com" required autofocus>
+                <label>Username</label>
+                <input type="text" name="username" class="form-control" value="{{ old('username') }}"
+                    placeholder="NIM atau nama.user" required autofocus>
             </div>
 
             <div class="mb-3">
