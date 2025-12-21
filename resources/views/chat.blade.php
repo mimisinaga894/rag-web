@@ -828,6 +828,7 @@
             line-height: 1.6;
             border: 1px solid rgba(14, 165, 233, 0.1);
             font-size: 13px;
+            white-space: pre-wrap;
         }
 
         /* Sources Display (Modern LLM Style) */
@@ -909,6 +910,7 @@
             animation: fadeInRight .4s ease;
             line-height: 1.6;
             font-size: 13px;
+            white-space: pre-wrap;
         }
 
         @keyframes fadeIn {
@@ -1000,12 +1002,7 @@
             display: flex;
             gap: 6px;
             padding: 12px 16px;
-            background: white;
-            backdrop-filter: blur(20px);
-            border-radius: 16px 16px 16px 4px;
             width: fit-content;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(14, 165, 233, 0.1);
         }
 
         .typing-dot {
@@ -1289,7 +1286,7 @@
                     @endif
 
                     @if ($msg->bot_response)
-                        <div class="bot-message">{!! nl2br(e($msg->bot_response)) !!}</div>
+                        <div class="bot-message">{{ $msg->bot_response }}</div>
                         @if ($msg->sources && count($msg->sources) > 0)
                             <div class="sources-container">
                                 <div class="sources-header">📚 <span>Sumber Referensi</span></div>
@@ -1839,7 +1836,7 @@
                 // Kirim pesan dengan timeout 200 detik (untuk model LLM besar seperti Qwen 8B)
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 200000); // 200 detik
-                
+
                 const response = await fetch(`/chat/${currentChatId}/send`, {
                     method: "POST",
                     headers: {
@@ -1852,7 +1849,7 @@
                     }),
                     signal: controller.signal
                 });
-                
+
                 clearTimeout(timeoutId);
 
                 const data = await response.json();
@@ -1881,7 +1878,7 @@
                 }
             } catch (error) {
                 hideTypingIndicator();
-                
+
                 // Bedakan antara timeout dan error lainnya
                 if (error.name === 'AbortError') {
                     addMessage("⏱️ Server terlalu lama merespons (timeout). Silakan coba lagi.", "bot");
