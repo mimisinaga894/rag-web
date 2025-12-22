@@ -219,25 +219,29 @@ class ChatController extends Controller
                 'url' => $ragApiUrl ?? 'unknown'
             ]);
 
-            $botText = "⚠️ Tidak dapat terhubung ke server AI.\n\n";
-            $botText .= "Pastikan:\n";
-            $botText .= "1. Server Python berjalan: uvicorn api.main:app --reload --port 5001\n";
-            $botText .= "2. Port 5001 tidak diblokir firewall\n";
-            $botText .= "3. Akses http://127.0.0.1:5001 di browser untuk cek status";
+            $botText = "Maaf, tidak dapat terhubung ke server AI. Silakan coba beberapa saat lagi.";
         } catch (\Illuminate\Http\Client\RequestException $e) {
             Log::error('📡 RAG API Request Error', [
                 'message' => $e->getMessage(),
                 'response' => $e->response ? $e->response->body() : null
             ]);
 
-            $botText = "Maaf, permintaan ke server AI gagal: " . $e->getMessage();
+            // Parse error untuk pesan yang lebih user-friendly
+            $errorMsg = $e->getMessage();
+            if (str_contains($errorMsg, '429') || str_contains(strtolower($errorMsg), 'rate')) {
+                $botText = "Maaf, server AI sedang sibuk. Silakan tunggu beberapa saat dan coba lagi.";
+            } elseif (str_contains($errorMsg, 'timeout')) {
+                $botText = "Maaf, permintaan memakan waktu terlalu lama. Silakan coba pertanyaan yang lebih singkat.";
+            } else {
+                $botText = "Maaf, terjadi kesalahan saat menghubungi server AI. Silakan coba lagi.";
+            }
         } catch (\Exception $e) {
             Log::error('❌ RAG API Exception', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $botText = "Maaf, layanan AI tidak tersedia: " . $e->getMessage();
+            $botText = "Maaf, terjadi kesalahan saat memproses pertanyaan Anda. Silakan coba lagi.";
         }
 
         // Simpan respons bot dan sources
