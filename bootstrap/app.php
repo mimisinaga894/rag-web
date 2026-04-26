@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Percayai semua proxy (terutama Cloudflare & Docker Nginx) agar HTTPS stabil
+        $middleware->trustProxies(at: '*');
+        
         // Register middleware alias untuk 'role'
         $middleware->alias([
             'role' => CheckRole::class,
