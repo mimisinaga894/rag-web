@@ -153,8 +153,7 @@
             backdrop-filter: blur(2px);
             pointer-events: auto;
         }
-
-        .sidebar-header {
+         .sidebar-header {
             display: flex;
             align-items: center;
             gap: 10px;
