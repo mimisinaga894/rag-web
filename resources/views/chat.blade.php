@@ -31,7 +31,8 @@
             display: flex;
             height: 90vh;
             max-height: 850px;
-            width: 440px;
+            width: 100%;
+            max-width: 440px;
             background: white;
             border-radius: 30px;
             overflow: hidden;
@@ -70,7 +71,11 @@
             border-right: none;
             overflow-y: auto;
             flex-shrink: 0;
+            position: absolute;
+            z-index: 100;
+            height: 100%;
         }
+
 
         .sidebar::-webkit-scrollbar {
             width: 6px;
@@ -87,6 +92,7 @@
 
         .sidebar.show {
             margin-left: 0;
+            width: 80%;
             box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
             border-right: 1px solid rgba(14, 165, 233, 0.1);
         }
@@ -116,7 +122,7 @@
             transform: translateY(-2px);
         }
 
-        /* Main chat wrapper for overlay effect */
+
         .main-chat {
             width: 100%;
             min-width: 100%;
@@ -127,7 +133,7 @@
             transition: all .3s ease;
         }
 
-        /* Overlay on main content when sidebar is open */
+
         .main-chat::after {
             content: '';
             position: absolute;
@@ -147,8 +153,7 @@
             backdrop-filter: blur(2px);
             pointer-events: auto;
         }
-
-        .sidebar-header {
+         .sidebar-header {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -782,6 +787,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+
         .header-title {
             flex: 1;
             text-align: center;
@@ -935,7 +941,7 @@
         }
 
 
-        /* Sources Display (Modern LLM Style) */
+
         .sources-container {
             margin: 8px 0 12px 0;
             max-width: 75%;
@@ -1239,21 +1245,23 @@
         @media (max-width: 768px) {
             body {
                 padding: 0;
+                align-items: stretch;
                 justify-content: center;
-                align-items: center;
             }
 
             .layout {
                 height: 100vh;
+                max-height: none;
+                width: 100vw;
+                max-width: none;
                 border-radius: 0;
-                max-width: 100%;
-                width: 100%;
                 border: none;
             }
 
             .bot-message,
             .user-message {
-                max-width: 80%;
+                max-width: 85%;
+                font-size: 14px;
             }
 
             .header {
@@ -1321,30 +1329,30 @@
 
             <ul class="chat-list" id="chatList">
                 @foreach ($chats as $chat)
-                    <li data-chat="{{ $chat->id }}" data-pinned="{{ $chat->is_pinned ?? false }}"
-                        class="{{ isset($active_chat) && $active_chat->id == $chat->id ? 'active' : '' }} {{ ($chat->is_pinned ?? false) ? 'pinned' : '' }}">
-                        <span class="chat-item-text" onclick="loadChat('{{ $chat->id }}')">
-                            @if($chat->is_pinned ?? false)<span class="pin-indicator">📌</span>@endif
-                            {{ $chat->title }}
-                        </span>
+                <li data-chat="{{ $chat->id }}" data-pinned="{{ $chat->is_pinned ?? false }}"
+                    class="{{ isset($active_chat) && $active_chat->id == $chat->id ? 'active' : '' }} {{ ($chat->is_pinned ?? false) ? 'pinned' : '' }}">
+                    <span class="chat-item-text" onclick="loadChat('{{ $chat->id }}')">
+                        @if($chat->is_pinned ?? false)<span class="pin-indicator">📌</span>@endif
+                        {{ $chat->title }}
+                    </span>
 
-                        <button class="chat-menu-btn" onclick="toggleChatMenu(event, '{{ $chat->id }}')">⋮</button>
+                    <button class="chat-menu-btn" onclick="toggleChatMenu(event, '{{ $chat->id }}')">⋮</button>
 
-                        <div class="chat-dropdown" id="dropdown-{{ $chat->id }}">
-                            <div class="chat-dropdown-item" onclick="pinChat(event, '{{ $chat->id }}')">
-                                <span class="menu-icon">📌</span>
-                                <span class="pin-text">{{ ($chat->is_pinned ?? false) ? 'Lepas Pin' : 'Pin' }}</span>
-                            </div>
-                            <div class="chat-dropdown-item" onclick="renameChat(event, '{{ $chat->id }}')">
-                                <span class="menu-icon">✏️</span>
-                                Rename
-                            </div>
-                            <div class="chat-dropdown-item danger" onclick="deleteChat(event, '{{ $chat->id }}')">
-                                <span class="menu-icon">🗑️</span>
-                                Hapus
-                            </div>
+                    <div class="chat-dropdown" id="dropdown-{{ $chat->id }}">
+                        <div class="chat-dropdown-item" onclick="pinChat(event, '{{ $chat->id }}')">
+                            <span class="menu-icon">📌</span>
+                            <span class="pin-text">{{ ($chat->is_pinned ?? false) ? 'Lepas Pin' : 'Pin' }}</span>
                         </div>
-                    </li>
+                        <div class="chat-dropdown-item" onclick="renameChat(event, '{{ $chat->id }}')">
+                            <span class="menu-icon">✏️</span>
+                            Rename
+                        </div>
+                        <div class="chat-dropdown-item danger" onclick="deleteChat(event, '{{ $chat->id }}')">
+                            <span class="menu-icon">🗑️</span>
+                            Hapus
+                        </div>
+                    </div>
+                </li>
                 @endforeach
             </ul>
 
@@ -1385,36 +1393,36 @@
             </header>
             <div class="chat-box" id="chatBox">
                 @forelse ($messages as $msg)
-                    @if ($msg->user_message)
-                        <div class="user-message">{{ $msg->user_message }}</div>
-                    @endif
+                @if ($msg->user_message)
+                <div class="user-message">{{ $msg->user_message }}</div>
+                @endif
 
-                    @if ($msg->bot_response)
-                        <div class="bot-message" data-markdown>{!! $msg->bot_response !!}</div>
-                        @if ($msg->sources && count($msg->sources) > 0)
-                            <div class="sources-container">
-                                <div class="sources-header">📚 <span>Sumber Referensi</span></div>
-                                <div class="sources-chips">
-                                    @foreach ($msg->sources as $source)
-                                        @if (!empty($source['doc_id']))
-                                            <a href="/dokumen/{{ $source['doc_id'] }}/download" target="_blank" class="source-chip"
-                                                title="Buka: {{ $source['name'] ?? 'Dokumen' }}">
-                                                <span class="source-icon">📄</span>
-                                                <span class="source-name">{{ Str::limit($source['name'] ?? 'Dokumen', 30) }}</span>
-                                            </a>
-                                        @else
-                                            <div class="source-chip" title="{{ $source['name'] ?? 'Dokumen' }}">
-                                                <span class="source-icon">📄</span>
-                                                <span class="source-name">{{ Str::limit($source['name'] ?? 'Dokumen', 30) }}</span>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
+                @if ($msg->bot_response)
+                <div class="bot-message" data-markdown>{!! $msg->bot_response !!}</div>
+                @if ($msg->sources && count($msg->sources) > 0)
+                <div class="sources-container">
+                    <div class="sources-header">📚 <span>Sumber Referensi</span></div>
+                    <div class="sources-chips">
+                        @foreach ($msg->sources as $source)
+                        @if (!empty($source['doc_id']))
+                        <a href="/dokumen/{{ $source['doc_id'] }}/download" target="_blank" class="source-chip"
+                            title="Buka: {{ $source['name'] ?? 'Dokumen' }}">
+                            <span class="source-icon">📄</span>
+                            <span class="source-name">{{ Str::limit($source['name'] ?? 'Dokumen', 30) }}</span>
+                        </a>
+                        @else
+                        <div class="source-chip" title="{{ $source['name'] ?? 'Dokumen' }}">
+                            <span class="source-icon">📄</span>
+                            <span class="source-name">{{ Str::limit($source['name'] ?? 'Dokumen', 30) }}</span>
+                        </div>
                         @endif
-                    @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+                @endif
                 @empty
-                    <div class="bot-message" id="greetingMessage">Halo! Ada yang bisa saya bantu hari ini? 😊</div>
+                <div class="bot-message" id="greetingMessage">Halo! Ada yang bisa saya bantu hari ini? 😊</div>
                 @endforelse
             </div>
 
@@ -1570,13 +1578,13 @@
             confirmCallback = null;
         }
 
-        document.getElementById('confirmModalAction').addEventListener('click', function () {
+        document.getElementById('confirmModalAction').addEventListener('click', function() {
             const callback = confirmCallback;
             closeConfirmModal();
             if (callback) callback();
         });
 
-        document.getElementById('confirmModal').addEventListener('click', function (e) {
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
             if (e.target === this) closeConfirmModal();
         });
 
@@ -1598,7 +1606,7 @@
             renameChatId = null;
         }
 
-        document.getElementById('renameModalAction').addEventListener('click', function () {
+        document.getElementById('renameModalAction').addEventListener('click', function() {
             const newTitle = document.getElementById('renameInput').value.trim();
             if (newTitle && renameCallback) {
                 renameCallback(newTitle);
@@ -1606,13 +1614,13 @@
             closeRenameModal();
         });
 
-        document.getElementById('renameInput').addEventListener('keypress', function (e) {
+        document.getElementById('renameInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 document.getElementById('renameModalAction').click();
             }
         });
 
-        document.getElementById('renameModal').addEventListener('click', function (e) {
+        document.getElementById('renameModal').addEventListener('click', function(e) {
             if (e.target === this) closeRenameModal();
         });
 
@@ -1688,7 +1696,9 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
-                    body: JSON.stringify({ pinned: !isPinned })
+                    body: JSON.stringify({
+                        pinned: !isPinned
+                    })
                 });
 
                 if (response.ok) {
@@ -1730,7 +1740,7 @@
             const chatText = li.querySelector('.chat-item-text');
             const currentTitle = chatText.textContent.replace('📌', '').trim();
 
-            showRenameModal(chatId, currentTitle, function (newTitle) {
+            showRenameModal(chatId, currentTitle, function(newTitle) {
                 if (newTitle !== currentTitle) {
                     fetch(`/chat/${chatId}/rename`, {
                         method: 'POST',
@@ -1738,7 +1748,9 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         },
-                        body: JSON.stringify({ title: newTitle })
+                        body: JSON.stringify({
+                            title: newTitle
+                        })
                     }).then(response => {
                         if (response.ok) {
                             const pinIndicator = chatText.querySelector('.pin-indicator');
@@ -1756,7 +1768,7 @@
             event.stopPropagation();
             closeAllMenus();
 
-            showConfirmModal('Hapus Obrolan', 'Apakah Anda yakin ingin menghapus obrolan ini?', function () {
+            showConfirmModal('Hapus Obrolan', 'Apakah Anda yakin ingin menghapus obrolan ini?', function() {
                 fetch(`/chat/${chatId}/delete`, {
                     method: 'DELETE',
                     headers: {
@@ -2101,7 +2113,12 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({ name, email, nim_nidn, password: password || null })
+                body: JSON.stringify({
+                    name,
+                    email,
+                    nim_nidn,
+                    password: password || null
+                })
             });
 
             const data = await response.json();
@@ -2167,7 +2184,7 @@
     }
 
     // Jalankan saat halaman dibuka
-    window.onload = function () {
+    window.onload = function() {
         loadTheme();
         loadAccount();
         parseExistingMarkdown();
