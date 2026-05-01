@@ -71,7 +71,11 @@
             border-right: none;
             overflow-y: auto;
             flex-shrink: 0;
+            position: absolute;
+            z-index: 100;
+            height: 100%;
         }
+
 
         .sidebar::-webkit-scrollbar {
             width: 6px;
@@ -88,6 +92,7 @@
 
         .sidebar.show {
             margin-left: 0;
+            width: 80%;
             box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
             border-right: 1px solid rgba(14, 165, 233, 0.1);
         }
@@ -783,6 +788,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+
         .header-title {
             flex: 1;
             text-align: center;
@@ -1230,7 +1236,7 @@
 
         .confirm-modal-btn.danger {
             background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: #fff:
+            color: #fff;
         }
 
         .confirm-modal-btn.danger:hover {
@@ -1240,21 +1246,23 @@
         @media (max-width: 768px) {
             body {
                 padding: 0;
+                align-items: stretch;
                 justify-content: center;
-                align-items: center;
             }
 
             .layout {
                 height: 100vh;
+                max-height: none;
+                width: 100vw;
+                max-width: none;
                 border-radius: 0;
-                max-width: 100%;
-                width: 100%;
                 border: none;
             }
 
             .bot-message,
             .user-message {
-                max-width: 80%;
+                max-width: 85%;
+                font-size: 14px;
             }
 
             .header {
